@@ -1,4 +1,4 @@
-import { CartonConfig } from '../../../generated/prisma';
+import { CartonConfig, PrismaClient } from '@prisma/client';
 import { Injectable, Body } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ShippingFeeInput } from '@/shipping/shippingFee/shippingFee.input';

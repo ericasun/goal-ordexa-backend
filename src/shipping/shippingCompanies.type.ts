@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { ShippingFeeType } from "@/shipping/shippingFee.type"
 const prisma = new PrismaClient();
 
