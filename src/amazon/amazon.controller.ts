@@ -54,10 +54,10 @@ export class AmazonController {
         tokens: data,
       };
     } catch (error) {
-      console.error(error.response?.data || error.message);
+      const errorData = error?.response?.data || { message: error.message || 'Unknown error' };
       return {
         message: '亚马逊授权失败',
-        error: error.response?.data || error.message,
+        error: errorData,
       };
     }
   }
