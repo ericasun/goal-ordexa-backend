@@ -27,7 +27,7 @@ export class AmazonController {
    */
   @Get('callback')
   async amazonCallback(@Query('spapi_oauth_code') code: string) {
-    console.log("=====到amazon这了======")
+    console.log("=====到amazon这了=====")
     if (!code) {
       return { message: '缺少授权码 spapi_oauth_code' };
     }
