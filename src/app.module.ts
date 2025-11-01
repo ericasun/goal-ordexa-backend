@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AmazonModule } from './amazon/amazon.module'; 
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from '@/prisma/prisma.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 import { ProductsModule } from '@/products/products.module';
 import { ShippingCompaniesModule } from '@/shipping/shippingCompanies/shippingCompanies.module';
