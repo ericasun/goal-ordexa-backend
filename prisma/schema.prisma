@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_DEV")
+}
+
+// 订单
+model Order {
+  id            String    @id @default(cuid())
+  platform      String
+  orderId       String    @unique
+  customerName  String?
+  totalAmount   Float
+  currency      String
+  createdAt     DateTime  @default(now())
+}
+
+// 注册用户
+model User {
+  id                Int           @id @default(autoincrement())
+  email             String        @unique
+  name              String?
+  password          String
+  
+  cartonConfig      CartonConfig[]
+  Inventory         Inventory[]
+  products          Product[]
+  shippingCompany   ShippingCompany[]
+  shippingFee       ShippingFee[]
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Page {
+  id              Int        @id @default(autoincrement())
+  key             String
+  label           String
+  content         String?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// 产品
+model Product {
+  id                Int              @id @default(autoincrement())
+  model             String
+  description       String?
+  sku               String           @unique
+
+  productName       String
+  productAlias      String?
+
+  productHeight     Float?
+  productLength     Float?
+  productWeight     Float?
+  productWidth      Float?
+  productCategory   String?         // 产品分类
+
+  userId            Int?
+  user              User?            @relation(fields: [userId], references: [id])
+
+  inventories       Inventory?
+
+  cartonConfigs     CartonConfig[]
+  packages          ProductPackage[]
+  shippingFees      ShippingFee[]     @relation("ProductShippingFees")
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+// 产品包装
+model ProductPackage {
+  id                    Int            @id @default(autoincrement())
+  packingTemplateName   String?       // 产品包装模板名称
+  packageLength         Float
+  packageWidth          Float
+  packageHeight         Float
+  packageWeight         Float
+  quantity              Int?
+  label                 String?
+
+  productId             Int
+  product               Product        @relation(fields: [productId], references: [id])
+
+  cartonConfigs         CartonConfig[]
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+// 外箱信息
+model CartonConfig {
+  id                    Int             @id @default(autoincrement())
+  cartonLength          Float
+  cartonWidth           Float
+  cartonHeight          Float
+  cartonWeight          Float
+  unitsPerCarton        Int
+  cartonModel           String?
+  cartonTemplateName    String          // 外箱包装模板名称
+
+  productPackageId      Int             @default(0)    // 产品包装id
+  productPackage        ProductPackage  @relation(fields: [productPackageId], references: [id])
+  
+  productId             Int
+  product               Product         @relation(fields: [productId], references: [id])
+
+  userId                Int?
+  user                  User?           @relation(fields: [userId], references: [id])
+
+  shippingFees          ShippingFee[]   @relation("CartonShippingFees")
+
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
+
+// 航运公司
+model ShippingCompany {
+  id                    Int           @id @default(autoincrement())
+  cnCompanyName         String        @unique
+  enCompanyName         String?
+  code                  String?       @unique
+  contactName           String?
+  contactPhone          String?
+  warehouseAddress      String?      // 海外仓地址
+  canShipToAmazon       Boolean?     // 是否可发亚马逊
+  hasOverseasWarehouse  Boolean?     // 是否有海外仓
+  country               String?
+  remark                String?
+
+  userId                Int?
+  user                  User?         @relation(fields: [userId], references: [id])
+
+  shippingFees          ShippingFee[]
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+// 物流费用
+model ShippingFee {
+  id             Int             @id @default(autoincrement())
+  channel        String          // 运输方式
+  costPerCarton  Float           // 费用
+  currency       String?         // 货币
+  remark         String?         // 备注
+  address        String          // 地址
+  country        String
+  startDate      DateTime?       // 开始时间
+  endDate        DateTime?       // 结束时间
+
+  cartonConfigId Int
+  carton         CartonConfig     @relation("CartonShippingFees", fields: [cartonConfigId], references: [id])
+
+  companyId      Int
+  company        ShippingCompany  @relation(fields: [companyId], references: [id])
+
+  productSku     String
+  product        Product          @relation("ProductShippingFees", fields: [productSku], references: [sku])
+  
+  userId         Int?
+  user           User?            @relation(fields: [userId], references: [id])
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+// 库存
+model Inventory {
+  id          Int       @id @default(autoincrement())
+  location    String?
+  quantity    Int       @default(0)
+
+  productSku  String    @unique
+  product     Product   @relation(fields: [productSku], references: [sku])
+  
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
